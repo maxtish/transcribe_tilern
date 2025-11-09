@@ -1,73 +1,68 @@
-python --version
-Python 3.11.x
+# Transcribe Tilern
 
+## Требования
+- Python 3.11.x
 
-Удаляем старый venv: если есть
+## Настройка виртуального окружения
+
+Если есть старое окружение, удаляем его:
+```powershell
+# Деактивировать окружение
 deactivate
+
+# Удалить папку venv
 Remove-Item -Recurse -Force .\venv
+```
 
-
-Создать новое виртуальное окружение на Python 3.11:
+Создать новое виртуальное окружение на Python 3.11 и активировать его:
+```powershell
 python -m venv venv
 .\venv\Scripts\activate
-
-
-или если создано 
+```
+Или если окружение уже создано:
+```powershell
 .\venv\Scripts\activate
+```
 
-
+Установить зависимости:
+```powershell
 pip install --upgrade -r requirements.txt
+```
 
-
-БЕЗ ДОКЕРА 
-Запуск сервера: 
-
+## Запуск сервера (без Docker)
+```powershell
 python -m uvicorn app.main:app --reload --port 8000
-
-
-страницу загрузки mp3 и  тестировать тайминги слов.
-
+```
+После запуска можно открыть страницу загрузки mp3 и тестировать тайминги слов:
+```
 http://localhost:8000/test
+```
 
+## Windows: настройка FFmpeg
 
+Необходим BtbN FFmpeg:
+[Ссылка на релизы](https://github.com/BtbN/FFmpeg-Builds/releases)
 
+1. Выбрать `win64-gpl` → распаковать архив.
+2. В распакованной папке есть `bin\ffmpeg.exe`.
+3. Добавить путь до `bin` в системный PATH:
+   1. Win + R → `sysdm.cpl`
+   2. Вкладка `Erweitert` (Дополнительно)
+   3. Кнопка `Umgebungsvariablen…` (Переменные среды)
+   4. В разделе `Systemvariablen` найти переменную `Path` → выделить → `Bearbeiten…`
+   5. Кнопка `Neu` → ввести путь к `bin`, например:
+   ```text
+   C:\ffmpeg\bin
+   ```
 
-WINDOWS 
-
-необходим BtbN
-
-Ссылка: https://github.com/BtbN/FFmpeg-Builds/releases
-Выбираешь win64-gpl → распаковываешь.
-В распакованной папке есть bin\ffmpeg.exe.
-Добавь путь до bin в системный PATH: 
-
-
-
-Нажми Win + R, введи:
-sysdm.cpl
-Перейди на вкладку Erweitert (Дополнительно).
-Нажми кнопку Umgebungsvariablen… (Переменные среды).
-Внизу в разделе Systemvariablen (Системные переменные) найди переменную Path → выдели → Bearbeiten… (Редактировать).
-Нажми Neu (Создать)
-Введи путь к bin внутри твоей папки ffmpeg, например:
-C:\ffmpeg\bin
-
-
-Проверка
+Проверка установки:
+```powershell
 ffmpeg -version
+```
 
-
-
-
-requirements.txt
-
-fastapi — фреймворк для создания API.
-
-uvicorn — сервер ASGI, на котором запускается FastAPI.
-
-whisperx — библиотека для транскрипции аудио и точного тайминга слов.
-
-torch и torchaudio — PyTorch и аудио-библиотека для работы с моделями.
-
-numpy — для работы с массивами данных.
-
+## requirements.txt
+- **fastapi** — фреймворк для создания API.
+- **uvicorn** — сервер ASGI для запуска FastAPI.
+- **whisperx** — библиотека для транскрипции аудио с точным таймингом слов.
+- **torch** и **torchaudio** — PyTorch и аудио-библиотека для работы с моделями.
+- **numpy** — для работы с массивами данных.
