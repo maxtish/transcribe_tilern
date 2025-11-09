@@ -60,9 +60,40 @@ http://localhost:8000/test
 ffmpeg -version
 ```
 
+
+
+
+
+
+## Запуск сервера (Docker)
+```powershell
+docker-compose build
+docker-compose up -d
+```
+После запуска можно открыть страницу загрузки mp3 и тестировать тайминги слов:
+```
+http://localhost:8000/test
+```
+
+
+
+
+
+
+
 ## requirements.txt
 - **fastapi** — фреймворк для создания API.
 - **uvicorn** — сервер ASGI для запуска FastAPI.
 - **whisperx** — библиотека для транскрипции аудио с точным таймингом слов.
 - **torch** и **torchaudio** — PyTorch и аудио-библиотека для работы с моделями.
 - **numpy** — для работы с массивами данных.
+
+
+
+
+
+
+docker-compose down -v  
+docker-compose up -d
+docker system prune -a --volumes
+docker-compose up -d --build

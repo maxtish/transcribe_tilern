@@ -1,19 +1,26 @@
-# базовый образ с CUDA (если GPU есть)
-FROM nvidia/cuda:12.1.0-runtime-ubuntu22.04
+# Базовый образ Python
+FROM python:3.11-slim
 
+# Рабочая директория
 WORKDIR /app
+
+# Не буферизовать вывод (удобнее для логов)
 ENV PYTHONUNBUFFERED=1
 
-# системные зависимости
-RUN apt-get update && apt-get install -y python3 python3-pip ffmpeg git
+# Устанавливаем системные зависимости
+RUN apt-get update && apt-get install -y ffmpeg git && apt-get clean
 
-# копируем и устанавливаем Python-зависимости
+# Копируем зависимости
 COPY requirements.txt .
-RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
 
-# копируем исходники
-COPY app/ /app/
+# Устанавливаем зависимости проекта
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+# Копируем исходный код приложения
+COPY /app .
+
+# Открываем порт
 EXPOSE 8000
 
+# Запуск сервера
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

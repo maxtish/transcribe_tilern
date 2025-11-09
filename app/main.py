@@ -1,14 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from .whisperx_service import transcribe_audio
+import os
 import tempfile
-import json
+
+from fastapi import FastAPI, File, Request, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from whisperx_service import transcribe_audio
 
 app = FastAPI(title="Transcribe Tilern")
-
-
 templates = Jinja2Templates(directory="app/templates")
 
 
@@ -22,8 +20,22 @@ async def get_test_page(request: Request):
 async def transcribe(file: UploadFile = File(...)):
     """Обрабатывает mp3 и возвращает JSON"""
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-    tmp.write(await file.read())
-    tmp.close()
 
-    result = transcribe_audio(tmp.name)
-    return JSONResponse(result)
+    try:
+        # записываем содержимое файла
+        tmp.write(await file.read())
+        tmp.close()
+
+        # лог для наглядности
+        print(f"[DEBUG] Saved temp file: {tmp.name}")
+
+        # передаём путь в WhisperX
+        result = transcribe_audio(tmp.name)
+
+        return JSONResponse(result)
+
+    finally:
+        # удаляем временный файл после обработки
+        if os.path.exists(tmp.name):
+            os.remove(tmp.name)
+            print(f"[DEBUG] Removed temp file: {tmp.name}")
