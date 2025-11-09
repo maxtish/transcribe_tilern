@@ -1,0 +1,46 @@
+# ----------------------
+# Python
+# ----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальные окружения
+venv/
+env/
+.venv/
+
+# ----------------------
+# Logs and temp files
+# ----------------------
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ----------------------
+# OS-specific
+# ----------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------
+# IDE / Editor
+# ----------------------
+.vscode/
+.idea/
+
+# ----------------------
+# FastAPI / Database
+# ----------------------
+*.db
+*.sqlite3
+
+# ----------------------
+# WhisperX / PyTorch / HuggingFace
+# ----------------------
+*.bin
+*.pt
+*.ckpt
+~/.cache/huggingface/hub

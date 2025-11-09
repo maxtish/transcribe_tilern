@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Transcribe Tilern Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 2rem;
+            background: #f7f7f7;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #result {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎙️ Transcribe Tilern Test</h1>
+    <form id="uploadForm">
+        <input type="file" name="file" accept="audio/mp3,audio/mpeg" required />
+        <button type="submit">Отправить</button>
+    </form>
+
+    <div id="status"></div>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const statusDiv = document.getElementById("status");
+        const resultDiv = document.getElementById("result");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fileInput = form.querySelector("input[type='file']");
+            if (!fileInput.files.length) return alert("Выберите mp3 файл");
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            statusDiv.innerHTML = "⏳ Обработка...";
+            resultDiv.innerHTML = "";
+
+            try {
+                const res = await fetch("/transcribe", { method: "POST", body: formData });
+                const data = await res.json();
+
+                statusDiv.innerHTML = `✅ Готово. Язык: ${data.language}, Длительность: ${data.duration}s`;
+
+                const rows = data.words
+                    .map(w => `<tr><td>${w.word}</td><td>${w.start}</td><td>${w.end}</td></tr>`)
+                    .join("");
+
+                resultDiv.innerHTML = `
+          <table>
+            <thead><tr><th>Слово</th><th>Начало (с)</th><th>Конец (с)</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+            } catch (err) {
+                statusDiv.innerHTML = "❌ Ошибка обработки";
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+
+</html>
