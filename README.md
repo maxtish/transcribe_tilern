@@ -66,6 +66,13 @@ ffmpeg -version
 
 
 ## Запуск сервера (Docker)
+
+Создай общую сеть
+```powershell
+docker network create shared_network
+```
+
+
 ```powershell
 docker-compose build
 docker-compose up -d
@@ -97,3 +104,23 @@ docker-compose down -v
 docker-compose up -d
 docker system prune -a --volumes
 docker-compose up -d --build
+
+
+Удали старые контейнеры и образы:
+docker-compose down --rmi all
+
+Пересобери:
+docker-compose up --build
+
+
+
+чтобы модели подгружались уже при сборке Docker (а не при первом старте)
+
+Можно добавить шаг загрузки в Dockerfile, например:
+
+
+
+
+
+# В конце Dockerfile перед CMD
+RUN python -c "import whisperx_service; print('✅ WhisperX preloaded')"

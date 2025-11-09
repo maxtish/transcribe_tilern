@@ -7,5 +7,9 @@ services:
     ports:
       - "8000:8000"
     restart: unless-stopped
-    volumes:
-      - ./app:/app
+    networks:
+      - shared_network
+
+networks:
+  shared_network:
+    external: true
