@@ -2,14 +2,16 @@ import os
 import tempfile
 import threading
 
-from fastapi import FastAPI, File, Request, UploadFile
+# Импортируем нашу оптимизированную логику
+import whisperx_service as ws
+from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
-app = FastAPI(title="Transcribe Tilern")
+app = FastAPI(title="Transcribe Service")
 templates = Jinja2Templates(directory="templates")
 
-# Глобальная ссылка на модель (ленивая инициализация)
+# Глобальная ссылка на сервис (ленивая инициализация)
 whisperx_service = None
 
 
@@ -19,8 +21,10 @@ def load_model_background():
 
     def load():
         global whisperx_service
-        print("[INIT] Loading WhisperX models... (this may take a few minutes)")
-        import whisperx_service as ws
+        print("[INIT] Loading WhisperX ASR model... (this may take a few minutes)")
+
+        # ⚠️ Вызываем функцию загрузки ASR-модели из сервиса
+        ws.load_whisperx_models()
 
         whisperx_service = ws
         print("[INIT] WhisperX is ready ✅")
@@ -30,14 +34,12 @@ def load_model_background():
 
 
 @app.get("/test", response_class=HTMLResponse)
-async def get_test_page(request: Request):
-    """Простая HTML страница для загрузки файла"""
-    return templates.TemplateResponse("test.html", {"request": request})
+# ... (остается без изменений)
 
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
-    """Обрабатывает mp3 и возвращает JSON"""
+    """Обрабатывает файл и возвращает JSON с таймингами слов."""
     global whisperx_service
 
     if whisperx_service is None:
@@ -56,6 +58,7 @@ async def transcribe(file: UploadFile = File(...)):
         tmp.close()
         print(f"[DEBUG] Saved temp file: {tmp.name}")
 
+        # Вызываем функцию транскрипции
         result = whisperx_service.transcribe_audio(tmp.name)
         return JSONResponse(result)
 
