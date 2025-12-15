@@ -2,7 +2,6 @@ import os
 import tempfile
 import threading
 
-# Импортируем нашу оптимизированную логику
 import whisperx_service as ws
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -11,38 +10,33 @@ from fastapi.templating import Jinja2Templates
 app = FastAPI(title="Transcribe Service")
 templates = Jinja2Templates(directory="templates")
 
-# Глобальная ссылка на сервис (ленивая инициализация)
-whisperx_service = None
+# --- Флаг готовности модели ---
+model_ready = False
 
 
 @app.on_event("startup")
-def load_model_background():
-    """Фоновая загрузка WhisperX при запуске FastAPI"""
+def load_model_on_startup():
+    """Загрузка модели при старте FastAPI."""
 
     def load():
-        global whisperx_service
+        global model_ready
         print("[INIT] Loading WhisperX ASR model... (this may take a few minutes)")
-
-        # ⚠️ Вызываем функцию загрузки ASR-модели из сервиса
-        ws.load_whisperx_models()
-
-        whisperx_service = ws
+        ws.load_whisperx_model()
+        model_ready = True
         print("[INIT] WhisperX is ready ✅")
 
-    # запускаем загрузку в отдельном потоке
     threading.Thread(target=load, daemon=True).start()
 
 
 @app.get("/test", response_class=HTMLResponse)
-# ... (остается без изменений)
+async def test():
+    return HTMLResponse("<h1>WhisperX Server is running</h1>")
 
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
-    """Обрабатывает файл и возвращает JSON с таймингами слов."""
-    global whisperx_service
-
-    if whisperx_service is None:
+    """Обрабатывает аудио и возвращает JSON с таймингами слов."""
+    if not model_ready:
         return JSONResponse(
             {
                 "status": "loading",
@@ -52,14 +46,12 @@ async def transcribe(file: UploadFile = File(...)):
         )
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-
     try:
         tmp.write(await file.read())
         tmp.close()
         print(f"[DEBUG] Saved temp file: {tmp.name}")
 
-        # Вызываем функцию транскрипции
-        result = whisperx_service.transcribe_audio(tmp.name)
+        result = ws.transcribe_audio(tmp.name)
         return JSONResponse(result)
 
     finally:
