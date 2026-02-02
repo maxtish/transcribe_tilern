@@ -92,7 +92,11 @@ def transcribe_audio(filepath: str):
                     "end": round(w.get("end", 0.0), 3),
                 }
             )
-
+    # --- Печатаем массив слов в консоль ---
+    print("[")
+    for w in words:
+        print(f"  {{ end: {w['end']}, word: '{w['word']}', start: {w['start']} }},")
+    print("]")
     return {
         "language": "de",
         "duration": duration,
